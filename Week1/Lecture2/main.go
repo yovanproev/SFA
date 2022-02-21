@@ -2,13 +2,19 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func main() {
 	fmt.Print("Enter Card 1, Card 1 suit, Card 2, Card 2 suit: ")
 	var card1, card2 int
 	var cardSuit1, cardSuit2 string
-	fmt.Scanf("%d %s %d %s", &card1, &cardSuit1, &card2, &cardSuit2)
+
+	_, err := fmt.Scanf("%d %s %d %s", &card1, &cardSuit1, &card2, &cardSuit2)
+
+	if err != nil {
+		panic(err)
+	}
 
 	compareCards(card1, cardSuit1, card2, cardSuit2)
 }
@@ -18,10 +24,10 @@ func convertCardSuits(cardOneSuit, cardTwoSuit string) (int, int) {
 	var number1, number2 int
 
 	for i := range cardSuits {
-		if cardOneSuit == cardSuits[i] {
+		if strings.ToLower(cardOneSuit) == cardSuits[i] {
 			number1 = i + 1
 		}
-		if cardTwoSuit == cardSuits[i] {
+		if strings.ToLower(cardTwoSuit) == cardSuits[i] {
 			number2 = i + 1
 		}
 	}
@@ -44,6 +50,6 @@ func compareCards(cardOneVal int, cardOneSuit string, cardTwoVal int, cardTwoSui
 			fmt.Println(1)
 		}
 	} else {
-		fmt.Println("Invalid numbers, try again")
+		fmt.Println("Invalid number or suit, try again")
 	}
 }
