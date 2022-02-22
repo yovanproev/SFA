@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	singleMap()
+	citiesAndPrices()
 }
 
 func citiesAndPrices() ([]string, []int) {
@@ -24,19 +24,17 @@ func citiesAndPrices() ([]string, []int) {
 	for i := range prices {
 		prices[i] = rand.Intn(100)
 	}
-
+	groupSlice(cities, prices)
 	return cities, prices
 }
 
-func singleMap() {
-	cities, prices := citiesAndPrices()
+func groupSlice(keySlice []string, valueSlice []int) map[string][]int {
 	keys := make(map[string][]int)
 
-	for i, city := range cities {
-		keys[city] = prices[:4]
+	for i, city := range keySlice {
+		keys[city] = valueSlice[:4]
 		i++
 	}
-
-	fmt.Println((keys))
-
+	fmt.Println(keys)
+	return keys
 }
