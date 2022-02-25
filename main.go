@@ -14,7 +14,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	//Task 1
 	convertedCard1, convertedCard2 := compareCards.ConvertCardsToNumber(card1, cardSuit1, card2, cardSuit2)
 	compareCards.CompareCards(convertedCard1, convertedCard2)
 
+	//Task 2
+	compareCards.MaxCard(compareCards.CardsDeck)
 }
