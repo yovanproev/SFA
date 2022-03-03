@@ -67,4 +67,4 @@ func main() {
 // Output:
 // original slice [13 22 10]
 // reverse the slice [10 22 13]
-// sort the slice, biggest->smallest [22 13 10]
+// sort the slice, biggest->smallest [22 13 10].
