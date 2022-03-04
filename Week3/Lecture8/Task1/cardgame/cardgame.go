@@ -13,8 +13,8 @@ type Deck struct {
 
 // Card is what makes up a deck
 type Card struct {
-	Suite string
 	Value string
+	Suite string
 }
 
 func MakeDeck() Deck {
@@ -25,20 +25,20 @@ func MakeDeck() Deck {
 
 	for _, suite := range cardSuits {
 		for _, value := range cardValues {
-			cards.Cards = append(cards.Cards, Card{Suite: suite + " of", Value: value})
+			cards.Cards = append(cards.Cards, Card{Value: value + " of", Suite: suite})
 		}
 	}
 
 	return cards
 }
 
-func (d Deck) Deal(handSize int) {
-	if handSize == 52 {
-		fmt.Println("No more cards in the deck")
+func (d *Deck) Deal() *Card {
+
+	for i, card := range d.Cards {
+		fmt.Println(i+1, card)
 	}
-	for i := 0; i < handSize; i++ {
-		fmt.Println(d.Cards[i])
-	}
+	fmt.Println("The deck is empty")
+	return &d.Cards[0]
 }
 
 func (d Deck) Shuffle() {

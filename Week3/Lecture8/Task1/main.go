@@ -1,11 +1,12 @@
 package main
 
 import (
-	cardgame "cardgame/Task1"
+	"cardgame/carddraw"
+	"cardgame/cardgame"
 )
 
 func main() {
 	deck := cardgame.MakeDeck()
 	deck.Shuffle()
-	deck.Deal(10)
+	carddraw.DrawAllCards(&deck)
 }
