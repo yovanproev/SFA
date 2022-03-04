@@ -32,7 +32,7 @@ func MakeDeck() Deck {
 	return cards
 }
 
-func Deal(d Deck, handSize int) {
+func (d Deck) Deal(handSize int) {
 	if handSize == 52 {
 		fmt.Println("No more cards in the deck")
 	}

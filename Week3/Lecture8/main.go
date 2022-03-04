@@ -7,5 +7,5 @@ import (
 func main() {
 	deck := cardgame.MakeDeck()
 	deck.Shuffle()
-	cardgame.Deal(deck, 10)
+	deck.Deal(10)
 }
