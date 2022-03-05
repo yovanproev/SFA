@@ -25,6 +25,7 @@ var cardsDeck = Deck{
 	}},
 }
 
+// wasn't defined in the homework what the anonymous function should do exactly
 var (
 	anonymousFunc = func(cOne, cTwo Card) int {
 		fmt.Println(cOne.Strength[0] * cTwo.Strength[1])
