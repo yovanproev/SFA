@@ -6,61 +6,97 @@ import (
 	"time"
 )
 
-// Deck is a collection of cards
 type Deck struct {
-	Cards []Card
+	Value    []string
+	PrevItem *Deck
 }
 
-// Card is what makes up a deck
 type Card struct {
-	Suite string
-	Value string
+	LastItem *Deck
+	length   int
 }
 
 func main() {
-	deck := makeDeck()
-	deck.shuffle()
-	deck.deal(10)
+	deck := MakeDeck()
+	deck.Shuffle()
+
+	d := Card{}
+
+	node1 := &Deck{
+		Value: deck.Value,
+	}
+	node2 := &Deck{
+		Value: deck.Value,
+	}
+	node3 := &Deck{
+		Value: deck.Value,
+	}
+	node4 := &Deck{
+		Value: deck.Value,
+	}
+	d.Deal(node1)
+	d.Deal(node2)
+	d.Deal(node3)
+	d.Deal(node4)
+	ToSlice(d)
 }
 
-func makeDeck() Deck {
-	cards := Deck{}
+func MakeDeck() Deck {
+	var cards = Deck{}
 
-	cardSuits := []string{"Spades", "Diamonds", "Hearts", "Clubs"}
+	var cardSuits = []string{"Spades", "Diamonds", "Hearts", "Clubs"}
 	cardValues := []string{"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eigth", "Nine", "Ten", "Jack", "Queen", "King"}
 
 	for _, suite := range cardSuits {
 		for _, value := range cardValues {
-			cards.Cards = append(cards.Cards, Card{Suite: suite + " of", Value: value})
+			cards.Value = append(cards.Value, value+" of "+suite)
 		}
 	}
-
 	return cards
 }
 
-func (d Deck) deal(handSize int) {
-	if handSize == 52 {
-		fmt.Println("No more cards in the deck")
-	}
-	for i := 0; i < handSize; i++ {
-		fmt.Print(d.Cards[i])
-	}
+func (c *Card) Deal(d *Deck) {
+	second := c.LastItem
+	c.LastItem = d
+	c.LastItem.PrevItem = second
+	c.length++
 }
 
-func (d Deck) shuffle() {
+func ToSlice(c Card) []string {
+	var slice []string
+	var restOfDeck []string
+
+	for i := 0; i < c.length; i++ {
+		restOfDeck = nil
+		slice = append(slice, c.LastItem.Value[i])
+		restOfDeck = append(restOfDeck, c.LastItem.Value[c.length:52]...)
+	}
+
+	if c.LastItem == nil {
+		fmt.Println("No Deck initialized")
+	} else if restOfDeck == nil {
+		fmt.Println("Deck is empty")
+	} else {
+		fmt.Println("First Draw", slice)
+		fmt.Println("Rest of the Deck", restOfDeck)
+	}
+	return slice
+}
+
+func (d Deck) Shuffle() {
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
 
-	for i := range d.Cards {
-		newPosition := r.Intn(len(d.Cards) - 1)
+	for i := range d.Value {
+		newPosition := r.Intn(len(d.Value) - 1)
 
-		d.Cards[i], d.Cards[newPosition] = d.Cards[newPosition], d.Cards[i]
+		d.Value[i], d.Value[newPosition] = d.Value[newPosition], d.Value[i]
 	}
 }
 
-// deck.deal(52)
-//Output: No more cards in the deck
-//{Diamonds of Six}{Hearts of Three}{Spades of Eigth}{Clubs of Four}{Hearts of Two}{Spades of Ace}{Spades of Two}{Clubs of Ace}{Diamonds of Seven}{Spades of Ten}{Clubs of Three}{Hearts of Seven}{Hearts of Jack}{Hearts of Ace}{Diamonds of Three}{Hearts of Four}{Diamonds of Four}{Hearts of Six}{Clubs of Six}{Clubs of Seven}{Diamonds of Jack}{Hearts of Five}{Spades of Three}{Hearts of Queen}{Diamonds of Two}{Clubs of Queen}{Spades of Nine}{Hearts of King}{Diamonds of Ace}{Diamonds of King}{Clubs of Eigth}{Clubs of Five}{Hearts of Nine}{Clubs of Nine}{Hearts of Ten}{Hearts of Eigth}{Diamonds of Nine}{Clubs of Ten}{Spades of Five}{Spades of King}{Clubs of King}{Diamonds of Ten}{Diamonds of Five}{Spades of Jack}{Spades of Queen}{Spades of Seven}{Spades of Four}{Diamonds of Queen}{Diamonds of Eigth}{Clubs of Jack}{Clubs of Two}{Spades of Six}
-
-// deck.deal(10)
-//Output:{Spades of Four}{Spades of Two}{Hearts of Seven}{Diamonds of Four}{Hearts of Two}{Clubs of King}{Spades of Queen}{Spades of King}{Spades of Seven}{Clubs of Ace}
+// Random drawing cards. 4 cards drawn from deck.
+//Output:
+//First Draw [Five of Clubs Jack of Hearts Queen of Clubs Three of Hearts]
+//Rest of the Deck [Five of Diamonds Two of Hearts Four of Spades Eigth of Hearts Two of Diamonds Three of Clubs Queen of Spades Ten of Hearts Five of Spades Three of Spades Ace of Diamonds Six of Diamonds Eigth of Spades Queen of Diamonds Four of Hearts Five of Hearts Nine of Clubs King of
+//Clubs Six of Hearts Four of Diamonds Seven of Hearts Six of Clubs Three of Diamonds Ten of Diamonds Ace of Hearts Four of Clubs Seven of Spades Nine of Diamonds Ten of Clubs Eigth of Diamonds Eigth of Clubs Six of Spades Ace of Spades Nine of Hearts King of Hearts Jack of Diamonds King of
+//Spades Jack of Clubs Seven of Diamonds Queen of Hearts Seven of Clubs Two of Clubs Nine of Spades Ten of Spades King of Diamonds Jack of Spades Ace of Clubs Two of Spades]
