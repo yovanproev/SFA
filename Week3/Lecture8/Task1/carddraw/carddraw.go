@@ -5,11 +5,12 @@ import (
 )
 
 type Dealer interface {
-	Deal() *cardgame.Card
+	Deal2() *cardgame.Card2
 }
 
-func DrawAllCards(dealer Dealer) []cardgame.Card {
-	dealer.Deal()
+func DrawAllCards(dealer Dealer) []cardgame.Card2 {
 
-	return cardgame.MakeDeck().Cards
+	dealer.Deal2()
+
+	return []cardgame.Card2{}
 }
