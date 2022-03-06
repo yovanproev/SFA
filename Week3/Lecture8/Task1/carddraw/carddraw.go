@@ -11,12 +11,11 @@ type Dealer interface {
 
 func DrawAllCards(dealer Dealer) []cardgame.Card {
 
-	for i := 0; i < 52; i++ {
-		pointerToCard := dealer.Deal()
-		fmt.Println("First Draw ", *pointerToCard)
-
+	for i := 0; i < 10; i++ {
+		pointerToCard := *dealer.Deal()
+		fmt.Println("First Draw ", pointerToCard)
 	}
-	fmt.Println("Rest of Deck: ", dealer.Deal())
+	fmt.Println("Rest of Deck: ", dealer)
 
 	return []cardgame.Card{}
 }
