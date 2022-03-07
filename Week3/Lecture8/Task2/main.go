@@ -7,17 +7,14 @@ import (
 
 type Shape interface {
 	Area() float64
-	LargestArea() float64
 }
 
-type Shapes struct {
-	Shape []Shape
-}
+type Shapes []Shape
 
 func (s Shapes) LargestArea() float64 {
 	var largestNumber []float64
-	x := s.Shape
-	for _, s := range x {
+
+	for _, s := range s {
 		largestNumber = append(largestNumber, s.Area())
 	}
 
@@ -30,10 +27,6 @@ func (s Shapes) LargestArea() float64 {
 	}
 
 	return maxNumber
-}
-
-func (s Shapes) Area() float64 {
-	return 3.14
 }
 
 type Square struct {
@@ -52,35 +45,33 @@ func (c Circle) Area() float64 {
 	return math.Pi * c.radius * c.radius
 }
 
-func (s Square) LargestArea() float64 {
-	return s.width * s.height
-}
-
-func (c Circle) LargestArea() float64 {
-	return math.Pi * c.radius * c.radius
-}
-
-func measureLA(s Shape) {
-	fmt.Println("LargestArea", s.LargestArea())
-}
-
 func measureA(s Shape) {
 	fmt.Println("Area", s.Area())
 }
 
+func measureLA(s Shapes) {
+	fmt.Println("Lar.Area", s.LargestArea())
+}
+
 func main() {
-	s := Square{width: 5, height: 4}
-	c := Circle{radius: 2}
+	s := Square{
+		width:  5,
+		height: 3,
+	}
+	c := Circle{
+		radius: 5,
+	}
 
 	measureA(s)
 	measureA(c)
 
-	shape1 := []Shape{&Square{width: 5, height: 4}, &Circle{radius: 2}}
-	measureLA(Shapes{shape1})
+	var shapes = Shapes{s, c}
+
+	measureLA(shapes)
 }
 
 // Output:
-// Area 20
-// Area 12.566370614359172
-// All shapes [20 12.566370614359172]
-// LargestArea 20
+// Area 15
+// Area 78.53981633974483
+// All shapes [15 78.53981633974483]
+// Lar.Area 78.53981633974483
