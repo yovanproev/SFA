@@ -72,11 +72,6 @@ func processOdd(inputs []int) chan int {
 	return oddNumChan
 }
 
-type Metadata struct {
-	URL  string
-	Size int
-}
-
 // Output:
 // 2022/03/10 14:41:33 start
 // Even num:  34
