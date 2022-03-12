@@ -32,3 +32,16 @@ func generateThrottled(data string, bufferLimit int, clearInterval time.Duration
 
 	return channel
 }
+
+//Output:
+// 2022/03/12 12:11:12 foo
+// 2022/03/12 12:11:12 foo
+// 2022/03/12 12:11:13 foo
+// 2022/03/12 12:11:13 foo
+// 2022/03/12 12:11:14 foo
+// 2022/03/12 12:11:14 foo
+// 2022/03/12 12:11:15 foo
+// 2022/03/12 12:11:15 foo
+// 2022/03/12 12:11:16 foo
+// 2022/03/12 12:11:16 foo
+// exit status 0xc000013a
