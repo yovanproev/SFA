@@ -10,18 +10,17 @@ type Action func() error
 
 func main() {
 	//err := SafeExec(funcWithError, "Panic")
-	err := SafeExec(funcWithError, "")
+	//err := SafeExec(funcWithError, "")
+	err := SafeExec(funcWithError, "No Error")
 
 	if err != nil {
 		log.Fatalf("there was an error: %v", err())
 	}
 }
 
-var (
-	funcWithError = func() error {
-		return errors.New("Error producing function")
-	}
-)
+var funcWithError = func() error {
+	return errors.New("Error producing function")
+}
 
 func SafeExec(a Action, state string) Action {
 	defer func() {
@@ -32,7 +31,11 @@ func SafeExec(a Action, state string) Action {
 
 	if state == "Panic" {
 		panic("state cannot be Panic, panicking!")
+	} else if state == "No Error" {
+		fmt.Println("No error")
+		return nil
 	}
+
 	return funcWithError
 }
 
@@ -41,3 +44,6 @@ func SafeExec(a Action, state string) Action {
 
 // Input: err := SafeExec(funcWithError, "")
 // Output: 2022/03/08 11:47:45 there was an error: Error producing function exit status 1
+
+// Input: SafeExec(funcWithError, "No Error")
+// Output: 	No Error
