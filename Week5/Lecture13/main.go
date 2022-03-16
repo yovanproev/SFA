@@ -11,6 +11,7 @@ type BufferedContext struct {
 	context.Context
 	channel    chan string
 	bufferSize int
+	context.CancelFunc
 }
 
 func main() {
@@ -35,13 +36,14 @@ func main() {
 
 func NewBufferedContext(timeout time.Duration, bufferSize int) *BufferedContext {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
+
 	out := make(chan string, bufferSize)
 
 	return &BufferedContext{
 		Context:    ctx,
 		channel:    out,
 		bufferSize: bufferSize,
+		CancelFunc: cancel,
 	}
 }
 
@@ -57,6 +59,7 @@ func (bc *BufferedContext) Done() <-chan struct{} {
 			cummulateChannel = append(cummulateChannel, <-channel)
 		}
 		if len(cummulateChannel) == bc.bufferSize {
+			// bc.CancelFunc()
 			close(channel)
 			fmt.Println("Channel closed because of overloading")
 		}
