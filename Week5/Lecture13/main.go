@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 )
 
@@ -20,6 +19,12 @@ func main() {
 	modifiedDone := ctx.Done()
 
 	ctx.Run(func(ctx context.Context, buffer chan string) {
+		defer func() {
+			// recover from panic caused by writing to a closed channel
+			if r := recover(); r != nil {
+				return
+			}
+		}()
 
 		for {
 			select {
@@ -27,8 +32,8 @@ func main() {
 				fmt.Println(ctx.Err())
 				return
 			case buffer <- "bar":
-				time.Sleep(time.Millisecond * 200) //try different values here
 				fmt.Println("bar")
+				time.Sleep(time.Millisecond * 200) //try different values here
 			}
 		}
 	})
@@ -48,22 +53,18 @@ func NewBufferedContext(timeout time.Duration, bufferSize int) *BufferedContext 
 }
 
 func (bc *BufferedContext) Done() <-chan struct{} {
-	var wg sync.WaitGroup
 	channel := bc.channel
 	var cummulateChannel []string
 
-	wg.Add(1)
 	go func() {
 		for i := 0; i < bc.bufferSize; i++ {
-			defer wg.Done()
 			cummulateChannel = append(cummulateChannel, <-channel)
 		}
 		if len(cummulateChannel) == bc.bufferSize {
-			// bc.CancelFunc()
 			close(channel)
-			fmt.Println("Channel closed because of overloading")
+			bc.CancelFunc()
+			fmt.Printf("channel closed, buffer size of %v reached", bc.bufferSize)
 		}
-		wg.Wait()
 	}()
 	return bc.Context.Done()
 }
@@ -82,6 +83,21 @@ func (bc *BufferedContext) Run(fn func(context.Context, chan string)) {
 // bar
 // bar
 // bar
-// Channel closed because of overloading
 // bar
-// context canceled
+// channel closed, buffer size of 10 reached
+
+// Output:
+// bar
+// bar
+// context deadline exceeded
+
+// Output:
+// bar
+// bar
+// bar
+// bar
+// bar
+// bar
+// context deadline exceeded
+
+// etc....
