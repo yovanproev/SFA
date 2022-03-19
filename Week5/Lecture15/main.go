@@ -28,14 +28,14 @@ func sortDates(format string, dates ...string) ([]string, error) {
 	sort.Sort(ByDate(datesInTimeFormat))
 
 	for _, v := range datesInTimeFormat {
-		sortedDates = append(sortedDates, v.String())
+		sortedDates = append(sortedDates, v.Format(format))
 	}
 
 	return sortedDates, mismatch
 }
 
 func main() {
-	var dates = []string{"Sep-14-2008", "Dec--2021", "Mar-18-2022", "Apr-01-2006"}
+	var dates = []string{"Sep-14-2008", "Dec-03-2021", "Mar-18-2022", "Apr-01-2006"}
 	var format = "Jan-02-2006"
 
 	sortingDates, err := sortDates(format, dates...)
@@ -49,7 +49,7 @@ func main() {
 
 // Input: var dates = []string{"Sep-14-2008", "Dec-03-2021", "Mar-18-2022", "Apr-01-2006"}
 // Output:
-// [2006-04-01 00:00:00 +0000 UTC 2008-09-14 00:00:00 +0000 UTC 2021-12-03 00:00:00 +0000 UTC 2022-03-18 00:00:00 +0000 UTC]
+// [Apr-01-2006 Sep-14-2008 Dec-03-2021 Mar-18-2022]
 
 // Input with error: var dates = []string{"Sep-14-2008", "Dec--2021", "Mar-18-2022", "Apr-01-2006"}
 // Could not parse time:  parsing time "Dec--2021" as "Jan-02-2006": cannot parse "-2021" as "02"
