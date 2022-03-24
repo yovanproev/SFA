@@ -1,4 +1,4 @@
-package compareCards
+package cardgame
 
 import (
 	"fmt"

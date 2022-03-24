@@ -1,4 +1,4 @@
-package compareCards
+package cardgame
 
 import "testing"
 
@@ -29,7 +29,6 @@ func TestMaxCard(t *testing.T) {
 	}
 }
 
+// go test ./cardgame -cover
 // Output
-// $ go test ./... -cover
-// ?       compareCards    [no test files]
-// ok      compareCards/Tasks      (cached)        coverage: 83.7% of statements
+// ok      cardgame/cardgame       0.086s  coverage: 86.0% of statements

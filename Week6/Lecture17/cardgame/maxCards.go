@@ -1,6 +1,4 @@
-package compareCards
-
-import "fmt"
+package cardgame
 
 //func maxCard(cards []Card) Card { // use compareCards here to find the maximum ... }
 func MaxCard(cards []Card) Card {
@@ -18,8 +16,14 @@ func MaxCard(cards []Card) Card {
 
 	var number, suit = findMaxCard(cardOne, cardSuit)
 
-	fmt.Println("Strongest card is " + cards[0].Number[number-1] + " of " + cards[0].Suit[suit-1])
-	return cards[0]
+	var card = Card{
+		Number: []string{cards[0].Number[number-1]},
+		Suit:   []string{cards[0].Suit[suit-1]},
+	}
+
+	cards = append(cards, card)
+
+	return cards[1]
 }
 
 func findMaxCard(number, suit []int) (int, int) {

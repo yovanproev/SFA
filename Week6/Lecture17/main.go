@@ -1,7 +1,7 @@
 package main
 
 import (
-	compareCards "compareCards/Tasks"
+	cardgame "cardgame/cardgame"
 	"fmt"
 )
 
@@ -16,9 +16,10 @@ func main() {
 	}
 
 	//Task 1
-	var Cards = compareCards.ConvertCardsToNumber(card1, cardSuit1, card2, cardSuit2)
-	fmt.Println(compareCards.CompareCards(Cards, Cards))
+	Cards := cardgame.ConvertCardsToNumber(card1, cardSuit1, card2, cardSuit2)
+	fmt.Println(cardgame.CompareCards(Cards, Cards))
 
 	// Task 2
-	compareCards.MaxCard(compareCards.CardsDeck.Cards)
+	strongestCard := cardgame.MaxCard(cardgame.CardsDeck.Cards)
+	fmt.Println("Strongest card is " + strongestCard.Number[0] + " of " + strongestCard.Suit[0])
 }
