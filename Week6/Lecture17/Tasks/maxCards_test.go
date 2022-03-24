@@ -32,4 +32,4 @@ func TestMaxCard(t *testing.T) {
 // Output
 // $ go test ./... -cover
 // ?       compareCards    [no test files]
-// ok      compareCards/Tasks      (cached)        coverage: 85.7% of statements
+// ok      compareCards/Tasks      (cached)        coverage: 83.7% of statements

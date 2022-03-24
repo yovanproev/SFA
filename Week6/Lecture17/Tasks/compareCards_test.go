@@ -8,15 +8,6 @@ import (
 
 func TestCompareCards(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	randomizeCard1 := rand.Intn(13)
-	randomizeSuit1 := rand.Intn(4)
-	randomizeCard2 := rand.Intn(13)
-	randomizeSuit2 := rand.Intn(4)
-
-	card1 := CardsDeck.Cards[0].Number[randomizeCard1]
-	cardSuit1 := CardsDeck.Cards[0].Suit[randomizeSuit1]
-	card2 := CardsDeck.Cards[0].Number[randomizeCard2]
-	cardSuit2 := CardsDeck.Cards[0].Suit[randomizeSuit2]
 
 	var CardsDeckTest = Deck{
 		Cards: []Card{{
@@ -24,6 +15,16 @@ func TestCompareCards(t *testing.T) {
 			Suit:   []string{"club", "diamond", "heart", "spade"},
 		}},
 	}
+
+	randomizeCard1 := rand.Intn(13)
+	randomizeSuit1 := rand.Intn(4)
+	randomizeCard2 := rand.Intn(13)
+	randomizeSuit2 := rand.Intn(4)
+
+	card1 := CardsDeckTest.Cards[0].Number[randomizeCard1]
+	cardSuit1 := CardsDeckTest.Cards[0].Suit[randomizeSuit1]
+	card2 := CardsDeckTest.Cards[0].Number[randomizeCard2]
+	cardSuit2 := CardsDeckTest.Cards[0].Suit[randomizeSuit2]
 
 	// Act
 	cards := ConvertCardsToNumber(card1, cardSuit1, card2, cardSuit2)
@@ -58,4 +59,4 @@ func TestCompareCards(t *testing.T) {
 // Output
 // $ go test ./... -cover
 // ?       compareCards    [no test files]
-// ok      compareCards/Tasks      (cached)        coverage: 85.7% of statements
+// ok      compareCards/Tasks      (cached)        coverage: 83.7% of statements
