@@ -9,10 +9,10 @@ func main() {
 	fmt.Print("Enter Card 1, Card 1 suit, Card 2, Card 2 suit: ")
 	var card1, cardSuit1, card2, cardSuit2 string
 
-	_, err := fmt.Scanf("%s %s %s %s", &card1, &cardSuit1, &card2, &cardSuit2)
+	_, err := fmt.Scanf("%s %s %s %s\n", &card1, &cardSuit1, &card2, &cardSuit2)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	//Task 1

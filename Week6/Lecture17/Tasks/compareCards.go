@@ -26,6 +26,7 @@ func ConvertCardsToNumber(cardOneNumber, cardOneSuit, cardTwoNumber, cardTwoSuit
 
 	var cardOne, cardSuitOne, cardTwo, cardSuitTwo int
 
+	// turn string number of cards to integer
 	for idx := range CardsDeck.Cards[0].Number {
 		if strings.ToLower(cardOneNumber) == CardsDeck.Cards[0].Number[idx] {
 			cardOne = idx + 2
@@ -35,6 +36,7 @@ func ConvertCardsToNumber(cardOneNumber, cardOneSuit, cardTwoNumber, cardTwoSuit
 		}
 	}
 
+	// turn string suit of cards to integer
 	for idx := range CardsDeck.Cards[0].Suit {
 		if strings.ToLower(cardOneSuit) == CardsDeck.Cards[0].Suit[idx] {
 			cardSuitOne = idx + 1
@@ -56,6 +58,7 @@ func ConvertCardsToNumber(cardOneNumber, cardOneSuit, cardTwoNumber, cardTwoSuit
 	} else {
 		fmt.Println("The number/suit you inserted is invalid or invalid format, try again")
 	}
+
 	CardsDeck.Cards[0].Strength = append(CardsDeck.Cards[0].Strength, card1, card2)
 
 	return CardsDeck.Cards[0]
@@ -65,15 +68,17 @@ func CompareCards(cardOne Card, cardTwo Card) int {
 	var result int
 	var card1 = CardsDeck.Cards[0].Strength[0]
 	var card2 = CardsDeck.Cards[0].Strength[1]
+
 	if card1 < card2 {
 		result = -1
-	} else if card1 == 0 || card2 == 0 {
-		return 00000
-	} else if card1 == card2 {
-		result = 0
 	} else if card1 > card2 {
 		result = 1
+	} else if card1 > 0 && card2 > 0 && card1 == card2 {
+		result = 0
+	} else if card1 == 0 && card2 == 0 {
+		result = 123456789
 	}
+
 	return result
 }
 
