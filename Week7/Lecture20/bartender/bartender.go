@@ -64,11 +64,11 @@ func (c CocktailBartender) Start() CocktailBartender {
 	}
 
 	var drinks []string
-
+	var onlyOneDrinkMatch string
 	// Find ingredients for requested drink
 	for _, rec := range result.Drinks {
 
-		onlyOneDrinkMatch := RunesToStrings(c, rec.StrDrink)
+		onlyOneDrinkMatch = RunesToStrings(c, rec.StrDrink)
 
 		// list drinks DB if more than 1 match
 		if len(result.Drinks) > 1 {
@@ -92,7 +92,11 @@ func (c CocktailBartender) Start() CocktailBartender {
 		}
 	}
 
-	if drinks == nil {
+	_, everyFirstLetterCapital := TurnInputToRunes(c)
+
+	if everyFirstLetterCapital == "Nothing" {
+		os.Exit(1)
+	} else if drinks == nil {
 		fmt.Println("No matches in the DB.")
 		os.Exit(1)
 	}
@@ -113,9 +117,9 @@ func TakeConsoleInput() string {
 }
 
 func NextIterations(c CocktailBartender) {
-	runes, everyFirstLetterCapital := TurnInputToRunes(c)
+	runes, _ := TurnInputToRunes(c)
 
-	for everyFirstLetterCapital != string(runes) || len(c.DrinksFound) > 1 {
+	for {
 		fmt.Println(`
 					<- Now you can choose from the listed drinks! ->
 					`)
@@ -132,6 +136,7 @@ func NextIterations(c CocktailBartender) {
 		}
 
 	}
+
 }
 
 func listAllMeasuresAndIngredients(lastKey string, ingredientsInTheStruct reflect.Value) {
