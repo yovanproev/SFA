@@ -8,13 +8,11 @@ import (
 func main() {
 	fmt.Printf("What would you like to drink?\nThere are 635 drinks in the Database!\nProvide at least 3 letters in order to narrow your search or\nif you know the full name of the drink please provide it.\n")
 
-	firstConsoleInput := cocktails.TakeConsoleInput()
-
 	var newCocktail cocktails.CocktailBartender
-	newCocktail.UserInput = firstConsoleInput
+
+	cocktails.DrinksHandler(newCocktail)
 	newCocktail = cocktails.Bartender.Start(newCocktail)
 
-	cocktails.NextIterations(newCocktail)
 }
 
 // Output:

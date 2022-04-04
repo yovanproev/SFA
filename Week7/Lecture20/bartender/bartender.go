@@ -48,7 +48,51 @@ type CocktailBartender struct {
 }
 
 func (c CocktailBartender) Start() CocktailBartender {
-	modifyToURLAcceptableFormat := TurnInputToURLFormat(c)
+	result := makeQueryToURL(c)
+
+	var drinks []string
+
+	// Find ingredients for requested drink
+	for _, rec := range result.Drinks {
+
+		onlyOneDrinkMatch := RunesToStrings(c.UserInput, rec.StrDrink)
+
+		// list drinks DB if more than 1 match
+		if len(result.Drinks) > 1 {
+			fmt.Println("--", rec.StrDrink)
+		}
+
+		drinks = append(drinks, rec.StrDrink)
+
+		// if the input matches only 1 drink
+		if rec.StrDrink == onlyOneDrinkMatch {
+			ingredientsInTheStruct := reflect.ValueOf(rec)
+
+			listAllMeasuresAndIngredients(ingredientsInTheStruct)
+
+			// list the instructions
+			for _, line := range strings.Split(rec.StrInstructions, ",") {
+				fmt.Println(line)
+			}
+		}
+	}
+
+	_, everyFirstLetterCapital := TurnInputToRunes(c.UserInput)
+
+	if everyFirstLetterCapital == "Nothing" {
+		os.Exit(1)
+	} else if drinks == nil {
+		fmt.Println("No matches in the DB.")
+		os.Exit(1)
+	}
+
+	return CocktailBartender{
+		DrinksFound: drinks,
+	}
+}
+
+func makeQueryToURL(c CocktailBartender) CocktailBartender {
+	modifyToURLAcceptableFormat := TurnInputToURLFormat(c.UserInput)
 
 	resp, err := http.Get("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + modifyToURLAcceptableFormat)
 	if err != nil {
@@ -63,50 +107,10 @@ func (c CocktailBartender) Start() CocktailBartender {
 		fmt.Println("Can not unmarshal JSON")
 	}
 
-	var drinks []string
-	var onlyOneDrinkMatch string
-	// Find ingredients for requested drink
-	for _, rec := range result.Drinks {
-
-		onlyOneDrinkMatch = RunesToStrings(c, rec.StrDrink)
-
-		// list drinks DB if more than 1 match
-		if len(result.Drinks) > 1 {
-			fmt.Println("--", rec.StrDrink)
-		}
-
-		drinks = append(drinks, rec.StrDrink)
-
-		// if the input matches only 1 drink
-		if rec.StrDrink == onlyOneDrinkMatch {
-			var lastKey string
-
-			ingredientsInTheStruct := reflect.ValueOf(rec)
-
-			listAllMeasuresAndIngredients(lastKey, ingredientsInTheStruct)
-
-			// list the instructions
-			for _, line := range strings.Split(rec.StrInstructions, ",") {
-				fmt.Println(line)
-			}
-		}
-	}
-
-	_, everyFirstLetterCapital := TurnInputToRunes(c)
-
-	if everyFirstLetterCapital == "Nothing" {
-		os.Exit(1)
-	} else if drinks == nil {
-		fmt.Println("No matches in the DB.")
-		os.Exit(1)
-	}
-
-	return CocktailBartender{
-		DrinksFound: drinks,
-	}
+	return result
 }
 
-func TakeConsoleInput() string {
+func HandleConsoleInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	query, err := reader.ReadString('\n')
 	if err != nil {
@@ -116,15 +120,22 @@ func TakeConsoleInput() string {
 	return query
 }
 
-func NextIterations(c CocktailBartender) {
-	runes, _ := TurnInputToRunes(c)
+func DrinksHandler(c CocktailBartender) {
+	runes, _ := TurnInputToRunes(c.UserInput)
+
+	input := HandleConsoleInput()
+	cocktail := CocktailBartender{
+		UserInput: input,
+	}
+
+	c = Bartender.Start(cocktail)
 
 	for {
 		fmt.Println(`
 					<- Now you can choose from the listed drinks! ->
 					`)
 
-		input := TakeConsoleInput()
+		input = HandleConsoleInput()
 
 		if c.DrinksFound[0] != string(runes) {
 			cocktail := CocktailBartender{
@@ -134,12 +145,12 @@ func NextIterations(c CocktailBartender) {
 		} else {
 			os.Exit(1)
 		}
-
 	}
 
 }
 
-func listAllMeasuresAndIngredients(lastKey string, ingredientsInTheStruct reflect.Value) {
+func listAllMeasuresAndIngredients(ingredientsInTheStruct reflect.Value) {
+	var lastKey string
 	typeOfS := ingredientsInTheStruct.Type()
 
 	maps := make(map[string]string)

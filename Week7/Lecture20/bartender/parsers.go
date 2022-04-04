@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func TurnInputToRunes(c CocktailBartender) ([]rune, string) {
+func TurnInputToRunes(s string) ([]rune, string) {
 	var turnInputToRunes []rune
 
-	modifyInputToAcceptedFormat := strings.Replace(c.UserInput, "\n", "", -1)
+	modifyInputToAcceptedFormat := strings.Replace(s, "\n", "", -1)
 	modifyInputToAcceptedFormat = strings.Replace(modifyInputToAcceptedFormat, "\r", "", -1)
 	everyFirstLetterCapital := strings.Title(strings.ToLower(string(modifyInputToAcceptedFormat)))
 
@@ -34,9 +34,9 @@ func adjustTheRuneSlice(str string) []rune {
 	return turnInputToRunes
 }
 
-func TurnInputToURLFormat(c CocktailBartender) string {
+func TurnInputToURLFormat(s string) string {
 	// drinks with Quotation mark
-	modifyToURLAcceptableFormat := strings.Replace(c.UserInput, "'", "%27", -1)
+	modifyToURLAcceptableFormat := strings.Replace(s, "'", "%27", -1)
 
 	everyFirstLetterCapital := strings.Title(strings.ToLower(modifyToURLAcceptableFormat))
 	modifyToURLAcceptableFormat = strings.Replace(everyFirstLetterCapital, " ", "%20", -1)
@@ -46,16 +46,16 @@ func TurnInputToURLFormat(c CocktailBartender) string {
 	return modifyToURLAcceptableFormat
 }
 
-func RunesToStrings(c CocktailBartender, drink string) string {
+func RunesToStrings(s string, drink string) string {
 	var runesToStrings string
 
-	if smallLetterAfterQuotationMarks(c.UserInput) != nil {
-		everyFirstLetterCapital := strings.Title(strings.ToLower(c.UserInput))
-		modify := strings.Replace(everyFirstLetterCapital, "'S", string(smallLetterAfterQuotationMarks(c.UserInput)[0][0]), -1)
+	if smallLetterAfterQuotationMarks(s) != nil {
+		everyFirstLetterCapital := strings.Title(strings.ToLower(s))
+		modify := strings.Replace(everyFirstLetterCapital, "'S", string(smallLetterAfterQuotationMarks(s)[0][0]), -1)
 		adjustTheRuneSlice := adjustTheRuneSlice(modify)[0:len(drink)]
 		runesToStrings = string(adjustTheRuneSlice)
 	} else {
-		everyFirstLetterCapital := strings.Title(strings.ToLower(c.UserInput))
+		everyFirstLetterCapital := strings.Title(strings.ToLower(s))
 		adjustTheRuneSlice := adjustTheRuneSlice(everyFirstLetterCapital)[0:len(drink)]
 		runesToStrings = string(adjustTheRuneSlice)
 	}
