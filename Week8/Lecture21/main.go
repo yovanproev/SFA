@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
 type TopStories struct {
@@ -19,57 +20,66 @@ type Story struct {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("/top", HandleUserJSONResponse())
+	mux.HandleFunc("/top", handleUserJSONResponse)
 	http.ListenAndServe(":9000", mux)
 }
 
-func HandleUserJSONResponse() http.HandlerFunc {
-	turnStructToJSON := turnStructToJSON()
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(turnStructToJSON))
-	}
-}
+func handleUserJSONResponse(w http.ResponseWriter, r *http.Request) {
+	generatorStoriesToStruct := generatorStoriesToStruct()
 
-func turnStructToJSON() string {
-	stories := *GetStory()
-
-	b, err := json.MarshalIndent(stories, "", "    ")
-
+	b, err := json.MarshalIndent(generatorStoriesToStruct, "", "    ")
 	if err != nil {
 		fmt.Println(err)
-		return "nil"
 	}
 
-	return string(b)
+	w.Write([]byte(string(b)))
 }
 
-func GetStory() *TopStories {
-	sliceOfTopStories := GetTopStories()
-	var story Story
+func generatorStoriesToStruct() TopStories {
+	ch := make(chan Story)
 	var topStories TopStories
+	var wg sync.WaitGroup
+
+	firstTenTopStories := fetchTopStories()[0:10]
+
+	go func() {
+		for _, story := range firstTenTopStories {
+			wg.Add(1)
+			go fetchStory(ch, wg, story)
+		}
+		wg.Wait()
+		close(ch)
+	}()
 
 	for i := 0; i < 10; i++ {
-
-		storyURL := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(sliceOfTopStories[i]) + ".json?print=pretty"
-
-		resp, err := http.Get(storyURL)
-		if err != nil {
-			fmt.Println("No response from request ", err)
-		}
-		defer resp.Body.Close()
-
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err := json.Unmarshal(body, &story); err != nil {
-			fmt.Println("Can not unmarshal JSON")
-		}
-		topStories.Story = append(topStories.Story, story)
+		topStories.Story = append(topStories.Story, <-ch)
 	}
 
-	return &topStories
+	return topStories
 }
 
-func GetTopStories() []int {
+func fetchStory(ch chan Story, wg sync.WaitGroup, storyId int) {
+	defer wg.Done()
+
+	var story Story
+
+	storyURL := "https://hacker-news.firebaseio.com/v0/item/" + strconv.Itoa(storyId) + ".json?print=pretty"
+
+	resp, err := http.Get(storyURL)
+	if err != nil {
+		fmt.Println("No response from request ", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err := json.Unmarshal(body, &story); err != nil {
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	ch <- story
+}
+
+func fetchTopStories() []int {
 	var result []int
 	topStoriesURL := "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
 
