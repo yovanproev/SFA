@@ -5,15 +5,14 @@ import (
 	"strings"
 )
 
-func TurnInputToRunes(s string) ([]rune, string) {
+func turnInputToRunes(s string) ([]rune, string) {
 	var turnInputToRunes []rune
 
-	modifyInputToAcceptedFormat := strings.Replace(s, "\n", "", -1)
-	modifyInputToAcceptedFormat = strings.Replace(modifyInputToAcceptedFormat, "\r", "", -1)
-	everyFirstLetterCapital := strings.Title(strings.ToLower(string(modifyInputToAcceptedFormat)))
+	cutReaderNewLineChar := cutReaderNewLineChar(s)
+	everyFirstLetterCapital := strings.Title(strings.ToLower(cutReaderNewLineChar))
 
-	if smallLetterAfterQuotationMarks(modifyInputToAcceptedFormat) != nil {
-		modify := strings.Replace(everyFirstLetterCapital, "'S", string(smallLetterAfterQuotationMarks(modifyInputToAcceptedFormat)[0][0]), -1)
+	if smallLetterAfterQuotationMarks(cutReaderNewLineChar) != nil {
+		modify := strings.Replace(everyFirstLetterCapital, "'S", string(smallLetterAfterQuotationMarks(cutReaderNewLineChar)[0][0]), -1)
 		turnInputToRunes = adjustTheRuneSlice(modify)
 	} else {
 		turnInputToRunes = adjustTheRuneSlice(everyFirstLetterCapital)
@@ -34,28 +33,23 @@ func adjustTheRuneSlice(str string) []rune {
 	return turnInputToRunes
 }
 
-func TurnInputToURLFormat(s string) string {
-	// drinks with Quotation mark
-	modifyToURLAcceptableFormat := strings.Replace(s, "'", "%27", -1)
+func cutReaderNewLineChar(s string) string {
+	consoleInput := strings.Replace(s, "\n", "", -1)
+	consoleInput = strings.Replace(consoleInput, "\r", "", -1)
 
-	everyFirstLetterCapital := strings.Title(strings.ToLower(modifyToURLAcceptableFormat))
-	modifyToURLAcceptableFormat = strings.Replace(everyFirstLetterCapital, " ", "%20", -1)
-	modifyToURLAcceptableFormat = strings.Replace(modifyToURLAcceptableFormat, "\n", "", -1)
-	modifyToURLAcceptableFormat = strings.Replace(modifyToURLAcceptableFormat, "\r", "", -1)
-
-	return modifyToURLAcceptableFormat
+	return consoleInput
 }
 
-func RunesToStrings(s string, drink string) string {
+func runesToStrings(s string, drink string) string {
 	var runesToStrings string
 
+	everyFirstLetterCapital := strings.Title(strings.ToLower(s))
+
 	if smallLetterAfterQuotationMarks(s) != nil {
-		everyFirstLetterCapital := strings.Title(strings.ToLower(s))
 		modify := strings.Replace(everyFirstLetterCapital, "'S", string(smallLetterAfterQuotationMarks(s)[0][0]), -1)
 		adjustTheRuneSlice := adjustTheRuneSlice(modify)[0:len(drink)]
 		runesToStrings = string(adjustTheRuneSlice)
 	} else {
-		everyFirstLetterCapital := strings.Title(strings.ToLower(s))
 		adjustTheRuneSlice := adjustTheRuneSlice(everyFirstLetterCapital)[0:len(drink)]
 		runesToStrings = string(adjustTheRuneSlice)
 	}

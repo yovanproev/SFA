@@ -55,7 +55,7 @@ func (c CocktailBartender) Start() CocktailBartender {
 	// Find ingredients for requested drink
 	for _, rec := range result.Drinks {
 
-		onlyOneDrinkMatch := RunesToStrings(c.UserInput, rec.StrDrink)
+		onlyOneDrinkMatch := runesToStrings(c.UserInput, rec.StrDrink)
 
 		// list drinks DB if more than 1 match
 		if len(result.Drinks) > 1 {
@@ -77,7 +77,7 @@ func (c CocktailBartender) Start() CocktailBartender {
 		}
 	}
 
-	_, everyFirstLetterCapital := TurnInputToRunes(c.UserInput)
+	_, everyFirstLetterCapital := turnInputToRunes(c.UserInput)
 
 	if everyFirstLetterCapital == "Nothing" {
 		os.Exit(1)
@@ -92,7 +92,7 @@ func (c CocktailBartender) Start() CocktailBartender {
 }
 
 func makeQueryToURL(c CocktailBartender) CocktailBartender {
-	modifyToURLAcceptableFormat := TurnInputToURLFormat(c.UserInput)
+	modifyToURLAcceptableFormat := cutReaderNewLineChar(c.UserInput)
 
 	resp, err := http.Get("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + modifyToURLAcceptableFormat)
 	if err != nil {
@@ -110,7 +110,7 @@ func makeQueryToURL(c CocktailBartender) CocktailBartender {
 	return result
 }
 
-func HandleConsoleInput() string {
+func handleConsoleInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	query, err := reader.ReadString('\n')
 	if err != nil {
@@ -121,9 +121,10 @@ func HandleConsoleInput() string {
 }
 
 func DrinksHandler(c CocktailBartender) {
-	runes, _ := TurnInputToRunes(c.UserInput)
+	runes, _ := turnInputToRunes(c.UserInput)
 
-	input := HandleConsoleInput()
+	input := handleConsoleInput()
+
 	cocktail := CocktailBartender{
 		UserInput: input,
 	}
@@ -135,7 +136,7 @@ func DrinksHandler(c CocktailBartender) {
 					<- Now you can choose from the listed drinks! ->
 					`)
 
-		input = HandleConsoleInput()
+		input = handleConsoleInput()
 
 		if c.DrinksFound[0] != string(runes) {
 			cocktail := CocktailBartender{
