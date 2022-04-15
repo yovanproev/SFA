@@ -2,8 +2,8 @@ package hns
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -12,7 +12,7 @@ import (
 type TopStories struct {
 	Story     []Story `json:"top_stories"`
 	PageTitle string
-	StoryId   []int
+	serverURL string
 }
 
 type Story struct {
@@ -20,83 +20,89 @@ type Story struct {
 	Score int    `json:"score"`
 }
 
-func (ts TopStories) HandleUserJSONResponse(w http.ResponseWriter, r *http.Request) {
+func NewWorker(serverUrl string) *TopStories {
+	var result TopStories
+	result.serverURL = serverUrl
 
-	b, err := json.Marshal(ts)
+	return &result
+}
+
+func (ts TopStories) HandleUserJSONResponse(w http.ResponseWriter, r *http.Request) {
+	b, err := json.MarshalIndent(ts, "", "   ")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	w.Write([]byte(string(b)))
 }
 
-func GeneratorStoriesToStruct(s string) TopStories {
+func (ts TopStories) GeneratorStoriesToStruct(topTenStoriesId []int) TopStories {
 	ch := make(chan Story)
-	var topStories TopStories
 	var wg sync.WaitGroup
 
-	topStories = TopStories{
-		PageTitle: "Top 10 Hacker News Stories",
-	}
-
-	allStories := FetchTopStories(topStories)
+	ts.PageTitle = "Top 10 Hacker News Stories"
 
 	go func(URL string) {
-		for _, storyId := range allStories.StoryId[:10] {
+		for _, storyId := range topTenStoriesId {
 			wg.Add(1)
 			go fetchStory(ch, wg, storyId, URL)
 		}
 		wg.Wait()
 		close(ch)
-	}(s)
+	}(ts.serverURL)
 
 	for i := 0; i < 10; i++ {
-		topStories.Story = append(topStories.Story, <-ch)
+		ts.Story = append(ts.Story, <-ch)
 	}
 
-	return topStories
+	return ts
 }
 
-func fetchStory(ch chan Story, wg sync.WaitGroup, storyURL int, URL string) {
+func fetchStory(ch chan Story, wg sync.WaitGroup, storyId int, URL string) {
 	defer wg.Done()
 
 	var story Story
 	var resp *http.Response
 	var err error
 
-	if URL == "https://hacker-news.firebaseio.com/v0/item/" {
-		resp, err = http.Get(URL + strconv.Itoa(storyURL) + ".json?print=pretty")
+	if URL == "https://hacker-news.firebaseio.com/v0" {
+		resp, err = http.Get(URL + "/item/" + strconv.Itoa(storyId) + ".json?print=pretty")
 	} else {
-		resp, err = http.Get(URL)
+		resp, err = http.Get(URL + "/api/top")
 	}
 
 	if err != nil {
-		fmt.Println("No response from request ", err)
+		log.Println("No response from request ", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err := json.Unmarshal(body, &story); err != nil {
-		fmt.Println("Can not unmarshal JSON")
+		log.Printf("%s fetchStory for a channel", err)
 	}
 
 	ch <- story
 }
 
-func FetchTopStories(ts TopStories) TopStories {
-	topStoriesURL := "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
+func (ts TopStories) FetchTopStories() []int {
+	var result []int
 
-	resp, err := http.Get(topStoriesURL)
+	var resp *http.Response
+	var err error
+
+	resp, err = http.Get(ts.serverURL + "/topstories.json?print=pretty")
+
 	if err != nil {
-		fmt.Println("No response from request ", err)
+		log.Println("No response from request ", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
-	if err := json.Unmarshal(body, &ts.StoryId); err != nil {
-		fmt.Println("Can not unmarshal JSON")
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("Can not unmarshal JSON")
 	}
 
-	return ts
+	return result[:10]
 }

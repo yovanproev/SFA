@@ -9,17 +9,19 @@ import (
 
 func main() {
 
-	storyURL := "https://hacker-news.firebaseio.com/v0/item/"
-	generatedStories := hns.GeneratorStoriesToStruct(storyURL)
+	storiesURL := "https://hacker-news.firebaseio.com/v0"
+	worker := hns.NewWorker(storiesURL)
+	topTenStoriesId := worker.FetchTopStories()
+	gotFirstTen := worker.GeneratorStoriesToStruct(topTenStoriesId)
 
 	mux := http.NewServeMux()
+
 	// // Lecture 22 - Task 1
 	templates := populateTemplates()
-	generatorStoriesToStruct := hns.GeneratorStoriesToStruct(storyURL)
 
 	mux.HandleFunc("/top", func(w http.ResponseWriter, r *http.Request) {
 		t := templates.Lookup("index.html")
-		t.Execute(w, generatorStoriesToStruct)
+		t.Execute(w, gotFirstTen)
 
 		if t != nil {
 			err := t.Execute(w, nil)
@@ -31,7 +33,7 @@ func main() {
 		}
 	})
 
-	mux.HandleFunc("/api/top", generatedStories.HandleUserJSONResponse)
+	mux.HandleFunc("/api/top", gotFirstTen.HandleUserJSONResponse)
 	http.ListenAndServe(":9000", mux)
 }
 
