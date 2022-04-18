@@ -13,8 +13,8 @@ func GetDataFromServer() hns.TopStories {
 	topTenStoriesId := worker.FetchTopStories()
 	gotFirstTen := worker.GeneratorStoriesToStruct(topTenStoriesId)
 
-	// gotFirstTen.PageTitle = "Top 10 Hacker News Stories"
-	// hns.IndexTemplate(gotFirstTen)
+	gotFirstTen.PageTitle = "Top 10 Hacker News Stories"
+	hns.IndexTemplate(gotFirstTen)
 
 	return gotFirstTen
 }
@@ -24,8 +24,8 @@ func writeToDBAndPush(db *sql.DB) {
 	gotFirstTen := GetDataFromServer()
 	hns.StoreItem(db, gotFirstTen.Story)
 
-	// gotFirstTen.PageTitle = "Top 10 Hacker News Stories"
-	// hns.IndexTemplate(gotFirstTen)
+	gotFirstTen.PageTitle = "Top 10 Hacker News Stories"
+	hns.IndexTemplate(gotFirstTen)
 
 	mux.HandleFunc("/api/top", gotFirstTen.HandleUserJSONResponse)
 	http.ListenAndServe(":9000", mux)
