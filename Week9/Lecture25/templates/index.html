@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+</head>
+<body>
+ <h1>{{.PageTitle}}</h1>
+ {{range .Story}}
+ <li>{{.Title}}: {{.Score}}</li> 
+ {{end}}
+</body>
+</html>
