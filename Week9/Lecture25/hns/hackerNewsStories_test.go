@@ -2,6 +2,7 @@ package hns
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -96,11 +97,87 @@ func mockFetchTopStories(items []int) http.HandlerFunc {
 	}
 }
 
+func TestHandleUserJSONResponse(t *testing.T) {
+	var ts = TopStories{
+		Story: []Story{
+			{Title: "First Title", Score: 100},
+			{Title: "Second Title", Score: 200},
+			{Title: "... Title", Score: 300}},
+	}
+
+	router := http.NewServeMux()
+	mockServer := httptest.NewServer(router)
+
+	r := httptest.NewRequest("", mockServer.URL, nil)
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(ts.HandleUserJSONResponse)
+
+	handler.ServeHTTP(w, r)
+
+	// Check the status code is what we expect.
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	got := w.Body.String()
+	want := turnToProperJSONFormat(ts)
+
+	if !reflect.DeepEqual(want, got) {
+		t.Fatalf("Expected %+v, got %+v", want, got)
+	}
+}
+
+func turnToProperJSONFormat(ts TopStories) string {
+	story := []Story{}
+
+	for _, v := range ts.Story {
+		story = append(story, Story{
+			Title: v.Title,
+			Score: v.Score,
+		})
+	}
+
+	var topStoriesMap = make(map[string][]map[string]interface{})
+	var sliceOfMaps = make([]map[string]interface{}, 0)
+
+	for _, v := range story {
+		elem := reflect.ValueOf(&v).Elem()
+		relType := elem.Type()
+
+		var myMap = make(map[string]interface{})
+
+		for i := 0; i < relType.NumField(); i++ {
+			myMap[relType.Field(i).Name] = elem.Field(i).Interface()
+		}
+		delete(myMap, "DateStamp")
+
+		sliceOfMaps = append(sliceOfMaps, myMap)
+		topStoriesMap["top_stories"] = sliceOfMaps
+	}
+
+	var bytes []byte
+	var err error
+	if bytes, err = json.MarshalIndent(topStoriesMap, "", "   "); err != nil {
+		fmt.Printf("Should be able to marshal the results : %v", err)
+	}
+
+	return string(bytes)
+}
+
 // $ go test . -v -cover
+// === RUN   TestInitDB
+// --- PASS: TestInitDB (0.00s)
+// === RUN   TestCreateAndStoreAndReadTable
+// --- PASS: TestCreateAndStoreAndReadTable (0.01s)
 // === RUN   TestGeneratorStoriesToStruct
-// --- PASS: TestGeneratorStoriesToStruct (0.04s)
+// --- PASS: TestGeneratorStoriesToStruct (0.08s)
 // === RUN   TestFetchTopStories
-// --- PASS: TestFetchTopStories (0.00s)
+// --- PASS: TestFetchTopStories (0.02s)
+// === RUN   TestHandleUserJSONResponse
+// --- PASS: TestHandleUserJSONResponse (0.00s)
+// === RUN   TestInitializeDB
+// --- PASS: TestInitializeDB (0.01s)
 // PASS
-// coverage: 79.5% of statements
-// ok      hns/hns 0.137s  coverage: 79.5% of statements
+// coverage: 72.8% of statements
+// ok      hns/hns 0.455s  coverage: 72.8% of statements
