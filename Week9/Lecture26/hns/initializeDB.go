@@ -1,6 +1,8 @@
 package hns
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func InitializeDB(s string) (*sql.DB, TopStories) {
 	ts := TopStories{}

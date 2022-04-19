@@ -34,7 +34,7 @@ func writeToDBAndPush(db *sql.DB) {
 func main() {
 	mux := http.NewServeMux()
 
-	db, resultFromDb := hns.InitializeDB("data.db")
+	db, resultFromDb := hns.InitializeDB("../../data.db")
 
 	if resultFromDb.Story == nil {
 		writeToDBAndPush(db)

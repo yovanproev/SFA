@@ -2,10 +2,10 @@ package hns
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"sync"
 	"testing"
 )
@@ -99,32 +99,70 @@ func mockFetchTopStories(items []int) http.HandlerFunc {
 
 func TestHandleUserJSONResponse(t *testing.T) {
 	var ts = TopStories{
-		Story: []Story{{
-			Title: "First Title",
-			Score: 100,
-		}},
+		Story: []Story{
+			{Title: "First Title", Score: 100},
+			{Title: "Second Title", Score: 200},
+			{Title: "... Title", Score: 300}},
 	}
 
 	router := http.NewServeMux()
 	mockServer := httptest.NewServer(router)
 
-	reader := []strings.Reader{*strings.NewReader(ts.Story[0].Title)}
-	r := httptest.NewRequest("", mockServer.URL, &reader[0])
+	r := httptest.NewRequest("", mockServer.URL, nil)
 	w := httptest.NewRecorder()
-	ts.HandleUserJSONResponse(w, r)
+	handler := http.HandlerFunc(ts.HandleUserJSONResponse)
 
-	var bytes []byte
-	var err error
-	if bytes, err = json.Marshal(ts); err != nil {
-		t.Fatalf("Should be able to marshal the results : %v", err)
+	handler.ServeHTTP(w, r)
+
+	// Check the status code is what we expect.
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
 	}
 
-	got := (string(bytes))
-	want := `{"top_stories":[{"title":"First Title","score":100,"date_stamp":"0001-01-01T00:00:00Z"}]}`
+	got := w.Body.String()
+	want := turnToProperJSONFormat(ts)
 
 	if !reflect.DeepEqual(want, got) {
 		t.Fatalf("Expected %+v, got %+v", want, got)
 	}
+}
+
+func turnToProperJSONFormat(ts TopStories) string {
+	story := []Story{}
+
+	for _, v := range ts.Story {
+		story = append(story, Story{
+			Title: v.Title,
+			Score: v.Score,
+		})
+	}
+
+	var topStoriesMap = make(map[string][]map[string]interface{})
+	var sliceOfMaps = make([]map[string]interface{}, 0)
+
+	for _, v := range story {
+		elem := reflect.ValueOf(&v).Elem()
+		relType := elem.Type()
+
+		var myMap = make(map[string]interface{})
+
+		for i := 0; i < relType.NumField(); i++ {
+			myMap[relType.Field(i).Name] = elem.Field(i).Interface()
+		}
+		delete(myMap, "DateStamp")
+
+		sliceOfMaps = append(sliceOfMaps, myMap)
+		topStoriesMap["top_stories"] = sliceOfMaps
+	}
+
+	var bytes []byte
+	var err error
+	if bytes, err = json.MarshalIndent(topStoriesMap, "", "   "); err != nil {
+		fmt.Printf("Should be able to marshal the results : %v", err)
+	}
+
+	return string(bytes)
 }
 
 // $ go test . -v -cover
