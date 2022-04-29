@@ -30,7 +30,7 @@ func IndexTemplate(gotFirstTen TopStories) {
 
 func populateTemplates() *template.Template {
 	result := template.New("")
-	const basePath = "Week9/Lecture26/templates"
+	const basePath = "Week9/Lecture25/templates"
 	template.Must(result.ParseGlob(basePath + "/*.html"))
 
 	return result
