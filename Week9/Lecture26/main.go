@@ -13,9 +13,6 @@ func GetDataFromServer() hns.TopStories {
 	topTenStoriesId := worker.FetchTopStories()
 	gotFirstTen := worker.GeneratorStoriesToStruct(topTenStoriesId)
 
-	gotFirstTen.PageTitle = "Top 10 Hacker News Stories"
-	hns.IndexTemplate(gotFirstTen)
-
 	return gotFirstTen
 }
 
@@ -38,7 +35,6 @@ func main() {
 
 	if resultFromDb.Story == nil {
 		writeToDBAndPush(db)
-
 	} else {
 		lastStoredItems := resultFromDb.Story[0].DateStamp
 		now := time.Now()
@@ -46,8 +42,10 @@ func main() {
 
 		if now.After(hourlyCheck) {
 			writeToDBAndPush(db)
-
 		} else {
+			resultFromDb.PageTitle = "Top 10 Hacker News Stories"
+			hns.IndexTemplate(resultFromDb)
+
 			mux.HandleFunc("/api/top", resultFromDb.HandleUserJSONResponse)
 			http.ListenAndServe(":9000", mux)
 		}
