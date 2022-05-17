@@ -72,33 +72,43 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 	return q.db.ExecContext(ctx, createUser, arg.Username, arg.Password, arg.Datestamp)
 }
 
-const deleteLists = `-- name: DeleteLists :exec
+const deleteListsById = `-- name: DeleteListsById :exec
 DELETE FROM lists
 WHERE id = ?
 `
 
-func (q *Queries) DeleteLists(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, deleteLists, id)
+func (q *Queries) DeleteListsById(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteListsById, id)
 	return err
 }
 
-const deleteTask = `-- name: DeleteTask :exec
+const deleteTaskById = `-- name: DeleteTaskById :exec
 DELETE FROM tasks
 WHERE id = ?
 `
 
-func (q *Queries) DeleteTask(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, deleteTask, id)
+func (q *Queries) DeleteTaskById(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteTaskById, id)
 	return err
 }
 
-const deleteUsers = `-- name: DeleteUsers :exec
+const deleteUserById = `-- name: DeleteUserById :exec
+DELETE FROM users
+WHERE id = ?
+`
+
+func (q *Queries) DeleteUserById(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteUserById, id)
+	return err
+}
+
+const deleteUserByUsername = `-- name: DeleteUserByUsername :exec
 DELETE FROM users
 WHERE username = ?
 `
 
-func (q *Queries) DeleteUsers(ctx context.Context, username string) error {
-	_, err := q.db.ExecContext(ctx, deleteUsers, username)
+func (q *Queries) DeleteUserByUsername(ctx context.Context, username string) error {
+	_, err := q.db.ExecContext(ctx, deleteUserByUsername, username)
 	return err
 }
 
@@ -136,34 +146,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
-const listLists = `-- name: ListLists :many
-SELECT id, name, userid FROM lists
-ORDER BY id DESC
-`
-
-func (q *Queries) ListLists(ctx context.Context) ([]List, error) {
-	rows, err := q.db.QueryContext(ctx, listLists)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []List
-	for rows.Next() {
-		var i List
-		if err := rows.Scan(&i.ID, &i.Name, &i.Userid); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listListsByUserId = `-- name: ListListsByUserId :many
 SELECT id, name, userid FROM lists
 WHERE userId = ?
@@ -192,13 +174,13 @@ func (q *Queries) ListListsByUserId(ctx context.Context, userid int32) ([]List, 
 	return items, nil
 }
 
-const listTasks = `-- name: ListTasks :many
+const listTasksByUserId = `-- name: ListTasksByUserId :many
 SELECT id, text, listid, userid, completed FROM tasks
-ORDER BY id DESC
+WHERE userId = ?
 `
 
-func (q *Queries) ListTasks(ctx context.Context) ([]Task, error) {
-	rows, err := q.db.QueryContext(ctx, listTasks)
+func (q *Queries) ListTasksByUserId(ctx context.Context, userid int32) ([]Task, error) {
+	rows, err := q.db.QueryContext(ctx, listTasksByUserId, userid)
 	if err != nil {
 		return nil, err
 	}
@@ -236,12 +218,12 @@ func (q *Queries) UpdateTask(ctx context.Context, id int32) (sql.Result, error) 
 	return q.db.ExecContext(ctx, updateTask, id)
 }
 
-const updateUsers = `-- name: UpdateUsers :execresult
+const updateUsersById = `-- name: UpdateUsersById :execresult
 UPDATE users
 SET datestamp = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
-func (q *Queries) UpdateUsers(ctx context.Context, id int32) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateUsers, id)
+func (q *Queries) UpdateUsersById(ctx context.Context, id int32) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateUsersById, id)
 }

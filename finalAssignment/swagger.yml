@@ -7,7 +7,48 @@
       email: nikola.aleksandrov@scalefocus.com
   host: localhost:3000
   basePath: /api
+  securityDefinitions:
+    basicAuth:
+      type: basic
+  #Basic auth to the whole API:
+  security:
+    - basicAuth: []
   paths:
+    /weather:
+      get:
+        tags:
+          - Weather
+        summary: weather
+        produces:
+          - application/json
+        parameters:
+          - name: lat
+            in: header
+            description: 'latitude'
+            required: true
+            type: number
+            format: double
+          - name: lon
+            in: header
+            description: 'longitude'
+            required: true
+            type: number
+            format: double
+        responses:
+           '200':
+              description: successful operation
+              schema:
+                $ref: '#/definitions/WeatherInfo'
+    /list/export:
+      get:
+        tags:
+          - Export
+        summary: Get csv file
+        produces:
+          - application/json
+        responses:
+           '200':
+              description: successful operation
     /lists/{id}/tasks:
       get:
         tags:
@@ -158,4 +199,13 @@
           type: integer
           format: int64
         name:
+          type: string
+    WeatherInfo:
+      type: object
+      properties:
+        formatedTemp:
+          type: string
+        description:
+          type: string
+        city:
           type: string

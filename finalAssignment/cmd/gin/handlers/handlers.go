@@ -2,7 +2,9 @@ package final
 
 import (
 	"context"
+	CSV "final/cmd/gin/csv"
 	"final/cmd/gin/sqlc/db"
+	weather "final/cmd/gin/weather"
 	"fmt"
 	"log"
 	"net/http"
@@ -48,17 +50,18 @@ func PostList(q *db.Queries) gin.HandlerFunc {
 			Userid: user.ID,
 		}
 
-		c.Bind(&list)
-
-		_, err2 := q.CreateList(context.Background(), list)
-		if err2 != nil {
-			log.Println(err2)
-		}
 		if user.Username == "test" && user.Password == "test" {
 			list = db.CreateListParams{
 				Name:   "Test List",
 				Userid: 1,
 			}
+		}
+
+		c.Bind(&list)
+
+		_, err2 := q.CreateList(context.Background(), list)
+		if err2 != nil {
+			log.Println(err2)
 		}
 
 		c.JSON(http.StatusCreated, list)
@@ -69,7 +72,12 @@ func DeleteList(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
 
-		listTasks, err := q.ListTasks(context.Background())
+		user, err := q.GetUserByDate(context.Background())
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		listTasks, err := q.ListTasksByUserId(context.Background(), user.ID)
 		if err != nil {
 			log.Println(err)
 		}
@@ -83,15 +91,15 @@ func DeleteList(q *db.Queries) gin.HandlerFunc {
 
 		var err2 error
 		for _, task := range filteredByID {
-			err2 = q.DeleteTask(context.Background(), task.ID)
+			err2 = q.DeleteTaskById(context.Background(), task.ID)
 		}
 
 		if id == 0 {
 			// deleting the entry from database when testing
 			// test database is always empty
-			err = q.DeleteLists(context.Background(), int32(id)+1)
+			err = q.DeleteListsById(context.Background(), int32(id)+1)
 		} else {
-			err = q.DeleteLists(context.Background(), int32(id))
+			err = q.DeleteListsById(context.Background(), int32(id))
 		}
 		if err != nil {
 			log.Println(err)
@@ -119,14 +127,14 @@ func GetTasks(q *db.Queries) gin.HandlerFunc {
 			log.Println(err)
 		}
 
-		listTasks, err := q.ListTasks(context.Background())
+		listTasks, err := q.ListTasksByUserId(context.Background(), user.ID)
 		if err != nil {
 			log.Println(err)
 		}
 
 		var filteredByID []db.Task
 		for _, task := range listTasks {
-			if int32(id) == task.Listid && listLists != nil && user.ID == task.Userid {
+			if int32(id) == task.Listid && listLists != nil {
 				filteredByID = append(filteredByID, task)
 			}
 		}
@@ -163,18 +171,18 @@ func PostTasks(q *db.Queries) gin.HandlerFunc {
 
 		c.Bind(&task)
 
-		_, err2 := q.CreateTask(context.Background(), task)
-		if err2 != nil {
-			log.Println(err2)
-		}
-
-		if task.Text == "" {
+		if task.Text == "" && id == 0 {
 			task = db.CreateTaskParams{
 				Text:      "Test Task",
 				Listid:    1,
 				Completed: true,
 				Userid:    1,
 			}
+		}
+
+		_, err2 := q.CreateTask(context.Background(), task)
+		if err2 != nil {
+			log.Println(err2)
 		}
 
 		c.JSON(http.StatusCreated, task)
@@ -196,8 +204,14 @@ func PatchTasks(q *db.Queries) gin.HandlerFunc {
 func DeleteTask(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
+		if id == 0 {
+			err := q.DeleteTaskById(context.Background(), 1)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 
-		err := q.DeleteTask(context.Background(), int32(id))
+		err := q.DeleteTaskById(context.Background(), int32(id))
 		if err == nil {
 			c.JSON(http.StatusOK, id)
 		} else {
@@ -223,5 +237,24 @@ func CreateUser(q *db.Queries, username, password string) {
 	if err != nil {
 		log.Println(err)
 	}
+}
 
+func ProduceCSV(q *db.Queries, filename string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, err := q.GetUserByDate(context.Background())
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		records := CSV.GetTasksByUser(q, user)
+		CSV.OpenCSV(records, filename)
+
+		c.File(filename)
+	}
+}
+
+func GetWeather(weather weather.WeatherInfo) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, weather)
+	}
 }

@@ -3,7 +3,7 @@ package final
 import (
 	"context"
 	"encoding/csv"
-	"final/cmd/echo/sqlc/db"
+	"final/cmd/gin/sqlc/db"
 	"fmt"
 	"log"
 	"os"
@@ -16,9 +16,9 @@ func GetTasksByUser(q *db.Queries, user db.User) [][]string {
 		fmt.Println(err)
 	}
 
-	listTasks, err2 := q.ListTasksByUserId(context.Background(), user.ID)
-	if err2 != nil {
-		fmt.Println(err2)
+	listTasks, err := q.ListTasksByUserId(context.Background(), user.ID)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	records := [][]string{}

@@ -13,9 +13,9 @@ func TestInitDB(t *testing.T) {
 	}
 }
 
-// go test . -v -cover
+// $ go test . -v -covr
 // === RUN   TestInitDB
 // --- PASS: TestInitDB (0.00s)
 // PASS
-// coverage: 78.9% of statements
-// ok      final/cmd/echo/DBInit   0.266s  coverage: 78.9% of statements
+// coverage: 79.2% of statements
+// ok      final/cmd/echo/DBInit   0.322s  coverage: 79.2% of statements

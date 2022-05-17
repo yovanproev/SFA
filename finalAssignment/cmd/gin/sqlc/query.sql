@@ -12,11 +12,11 @@ UPDATE tasks
 SET completed = true
 WHERE id = ?;
 
--- name: ListTasks :many
+-- name: ListTasksByUserId :many
 SELECT * FROM tasks
-ORDER BY id DESC;
+WHERE userId = ?;
 
--- name: DeleteTask :exec
+-- name: DeleteTaskById :exec
 DELETE FROM tasks
 WHERE id = ?;
 
@@ -27,15 +27,11 @@ INSERT INTO lists (
 ?, ?
 );
 
--- name: ListLists :many
-SELECT * FROM lists
-ORDER BY id DESC;
-
 -- name: ListListsByUserId :many
 SELECT * FROM lists
 WHERE userId = ?;
 
--- name: DeleteLists :exec
+-- name: DeleteListsById :exec
 DELETE FROM lists
 WHERE id = ?;
 
@@ -54,12 +50,15 @@ WHERE username = ?;
 SELECT * FROM users
 WHERE datestamp = CURRENT_TIMESTAMP;
 
--- name: UpdateUsers :execresult
+-- name: UpdateUsersById :execresult
 UPDATE users
 SET datestamp = CURRENT_TIMESTAMP
 WHERE id = ?;
 
--- name: DeleteUsers :exec
+-- name: DeleteUserByUsername :exec
 DELETE FROM users
 WHERE username = ?;
 
+-- name: DeleteUserById :exec
+DELETE FROM users
+WHERE id = ?;

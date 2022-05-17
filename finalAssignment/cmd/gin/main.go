@@ -3,7 +3,9 @@ package main
 import (
 	"final/cmd"
 	dbFinal "final/cmd/gin/DBInit"
-	routesTasks "final/cmd/gin/handlers"
+	handlers "final/cmd/gin/handlers"
+	login "final/cmd/gin/login"
+	weather "final/cmd/gin/weather"
 	"log"
 	"net/http"
 
@@ -15,25 +17,28 @@ func main() {
 
 	router := gin.Default()
 
-	router.Use(func(ctx *gin.Context) {
-		// This is a sample demonstration of how to attach middlewares in Gin
-		log.Println("Gin middleware was called")
-		ctx.Next()
+	authorized := router.Group("/")
+	authorized.Use(gin.BasicAuth(login.GinAccounts(q)))
+
+	authorized.Use(login.Login(q))
+
+	authorized.GET("/api", func(c *gin.Context) {
 	})
 
-	// Add your handler (API endpoint) registrations here
-	router.GET("/api", func(ctx *gin.Context) {
-		ctx.JSON(200, "Hello, World!")
-	})
+	authorized.GET("/api/lists", handlers.GetLists(q))
+	authorized.POST("/api/lists", handlers.PostList(q))
+	authorized.DELETE("/api/lists/:id", handlers.DeleteList(q))
 
-	router.GET("/api/lists", routesTasks.GetLists(q))
-	router.POST("/api/lists", routesTasks.PostList(q))
-	router.DELETE("/api/lists/:id", routesTasks.DeleteList(q))
+	authorized.GET("/api/lists/:id/tasks", handlers.GetTasks(q))
+	authorized.POST("/api/lists/:id/tasks", handlers.PostTasks(q))
+	authorized.PATCH("/api/tasks/:id", handlers.PatchTasks(q))
+	authorized.DELETE("/api/tasks/:id", handlers.DeleteTask(q))
 
-	router.GET("/api/lists/:id/tasks", routesTasks.GetTasks(q))
-	router.POST("/api/lists/:id/tasks", routesTasks.PostTasks(q))
-	router.PATCH("/api/tasks/:id", routesTasks.PatchTasks(q))
-	router.DELETE("/api/tasks/:id", routesTasks.DeleteTask(q))
+	authorized.GET("/api/list/export", handlers.ProduceCSV(q, "tasks.csv"))
+
+	apiKeys := weather.LoadEnv("production.env")
+	fetchWeather := weather.FetchWeather(41.99646, 21.43141, apiKeys, "")
+	authorized.GET("/api/weather", handlers.GetWeather(fetchWeather))
 
 	// Do not touch this line!
 	log.Fatal(http.ListenAndServe(":3000", cmd.CreateCommonMux(router)))
