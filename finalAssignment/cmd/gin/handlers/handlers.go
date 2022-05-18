@@ -264,7 +264,7 @@ func CreateUser(q *db.Queries, username, password string) {
 	}
 }
 
-func ProduceCSV(q *db.Queries, filename string) gin.HandlerFunc {
+func ProduceCSV(q *db.Queries, fileName string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username, _ := GetUserAndPassFromHeader(c)
 		user, err := q.GetUserByUsername(context.Background(), username)
@@ -272,10 +272,14 @@ func ProduceCSV(q *db.Queries, filename string) gin.HandlerFunc {
 			fmt.Println(err)
 		}
 
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Transfer-Encoding", "binary")
+		c.Header("Content-Disposition", "attachment; fileName="+fileName)
+		c.Header("Content-Type", "application/octet-stream")
 		records := CSV.GetTasksByUser(q, user)
-		CSV.OpenCSV(records, filename)
+		CSV.OpenCSV(records, fileName)
 
-		c.File(filename)
+		c.File(fileName)
 	}
 }
 

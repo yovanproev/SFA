@@ -407,5 +407,5 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 // === RUN   TestEmptyDBAfterTesting
 // --- PASS: TestEmptyDBAfterTesting (0.02s)
 // PASS
-// coverage: 74.4% of statements
+// coverage: 75.2% of statements
 // ok      final/cmd/gin/handlers  0.611s  coverage: 74.2% of statements
