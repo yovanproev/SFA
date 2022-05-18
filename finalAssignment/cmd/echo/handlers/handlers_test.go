@@ -32,7 +32,8 @@ var (
 		Completed: true,
 		Userid:    1,
 	}
-	mockTask = []db.CreateTaskParams{{
+	mockTask = []db.Task{{
+		ID:        0,
 		Text:      "Test Task",
 		Listid:    1,
 		Userid:    1,
@@ -83,11 +84,6 @@ func TestGetUserByUsername(t *testing.T) {
 func TestPostLists(t *testing.T) {
 	// Setup
 	e := echo.New()
-
-	_, err2 := mockDB().UpdateUsersById(context.Background(), 1)
-	if err2 != nil {
-		fmt.Println(err2)
-	}
 
 	handler := PostList(mockDB())
 
@@ -155,11 +151,6 @@ func TestGetTasks(t *testing.T) {
 func TestGetLists(t *testing.T) {
 	// Setup
 	e := echo.New()
-
-	_, err2 := mockDB().UpdateUsersById(context.Background(), 1)
-	if err2 != nil {
-		fmt.Println(err2)
-	}
 
 	handler := GetLists(mockDB())
 
@@ -344,5 +335,5 @@ func TestEmptyTheDBAfterTests(t *testing.T) {
 // === RUN   TestEmptyTheDBAfterTests
 // --- PASS: TestEmptyTheDBAfterTests (0.02s)
 // PASS
-// coverage: 76.2% of statements
+// coverage: 73.4% of statements
 // ok      final/cmd/echo/handlers 0.625s  coverage: 76.5% of statements

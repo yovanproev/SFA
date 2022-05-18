@@ -56,6 +56,7 @@ func Login(q *db.Queries) middleware.BasicAuthValidator {
 
 		// if no username is provided
 		if username == "" {
+			log.Println("No user provided")
 			dialog.Alert("You must provide a username!")
 			return false, nil
 		}
@@ -80,11 +81,6 @@ func Login(q *db.Queries) middleware.BasicAuthValidator {
 				fmt.Println(err2)
 			}
 
-			// create a new login data for the user
-			_, err3 := q.UpdateUsersById(context.Background(), user.ID)
-			if err3 != nil {
-				fmt.Println(err3)
-			}
 			return true, nil
 		}
 
@@ -92,6 +88,7 @@ func Login(q *db.Queries) middleware.BasicAuthValidator {
 
 		// if username exists and the password is incorrect
 		if user.Username == username && !checkPass {
+			log.Println("You password is incorrect, try again!")
 			dialog.Alert("You password is incorrect, try again!")
 			return false, nil
 		}
@@ -99,13 +96,6 @@ func Login(q *db.Queries) middleware.BasicAuthValidator {
 		// if username and password are a match
 		if subtle.ConstantTimeCompare([]byte(username), []byte(user.Username)) == 1 &&
 			checkPass {
-
-			// update the login
-			_, err := q.UpdateUsersById(context.Background(), user.ID)
-			if err != nil {
-				fmt.Println(err)
-			}
-
 			return true, nil
 		}
 

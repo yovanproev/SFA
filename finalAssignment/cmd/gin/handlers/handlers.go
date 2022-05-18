@@ -2,6 +2,7 @@ package final
 
 import (
 	"context"
+	"encoding/base64"
 	CSV "final/cmd/gin/csv"
 	"final/cmd/gin/sqlc/db"
 	weather "final/cmd/gin/weather"
@@ -9,13 +10,36 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
+func GetUserAndPassFromHeader(c *gin.Context) (string, string) {
+	userAndPass := c.Request.Header["Authorization"]
+	username := "test"
+	password := "test"
+
+	if userAndPass != nil {
+		trim := strings.Trim(userAndPass[0], "Basic")
+		trim = strings.Trim(trim, " ")
+
+		rawDecodedText, err := base64.StdEncoding.DecodeString(trim)
+		if err != nil {
+			panic(err)
+		}
+
+		splitToUserAndPass := strings.Split(string(rawDecodedText), ":")
+		username = splitToUserAndPass[0]
+	}
+
+	return username, password
+}
+
 func GetLists(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -41,7 +65,8 @@ func GetLists(q *db.Queries) gin.HandlerFunc {
 
 func PostList(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -71,8 +96,8 @@ func PostList(q *db.Queries) gin.HandlerFunc {
 func DeleteList(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
-
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -116,8 +141,8 @@ func DeleteList(q *db.Queries) gin.HandlerFunc {
 func GetTasks(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
-
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -157,9 +182,9 @@ func GetTasks(q *db.Queries) gin.HandlerFunc {
 func PostTasks(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
+		username, _ := GetUserAndPassFromHeader(c)
 
-		// get the last logged user by date
-		user, err := q.GetUserByDate(context.Background())
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -241,7 +266,8 @@ func CreateUser(q *db.Queries, username, password string) {
 
 func ProduceCSV(q *db.Queries, filename string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}

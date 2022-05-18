@@ -10,12 +10,6 @@ import (
 )
 
 func GetTasksByUser(q *db.Queries, user db.User) [][]string {
-	// get the last logged user by date
-	user, err := q.GetUserByDate(context.Background())
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	listTasks, err := q.ListTasksByUserId(context.Background(), user.ID)
 	if err != nil {
 		fmt.Println(err)

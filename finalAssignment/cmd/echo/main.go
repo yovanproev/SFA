@@ -17,11 +17,11 @@ func main() {
 	q := dbFinal.OpenDBConnection("storage.db")
 
 	router := echo.New()
-	router.Use(middleware.Logger())
 	router.Use(middleware.Recover())
 
 	router.Use(middleware.CORS())
 	router.Use(middleware.BasicAuth(login.Login(q)))
+
 	//Add your handler (API endpoint) registrations here
 	router.GET("/api", func(ctx echo.Context) error {
 		return ctx.JSON(200, "Hello, World!")

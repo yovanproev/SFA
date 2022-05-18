@@ -2,6 +2,7 @@ package final
 
 import (
 	"context"
+	"encoding/base64"
 	CSV "final/cmd/echo/csv"
 	"final/cmd/echo/sqlc/db"
 	weather "final/cmd/echo/weather"
@@ -9,13 +10,37 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
+func GetUserAndPassFromHeader(c echo.Context) (string, string) {
+	userAndPass := c.Request().Header.Get(echo.HeaderAuthorization)
+	username := "test"
+	password := "test"
+
+	if userAndPass != "" {
+		trim := strings.Trim(userAndPass, "Basic")
+		trim = strings.Trim(trim, " ")
+
+		rawDecodedText, err := base64.StdEncoding.DecodeString(trim)
+		if err != nil {
+			panic(err)
+		}
+
+		splitToUserAndPass := strings.Split(string(rawDecodedText), ":")
+		username = splitToUserAndPass[0]
+		password = splitToUserAndPass[1]
+	}
+
+	return username, password
+}
+
 func GetLists(q *db.Queries) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -41,7 +66,8 @@ func GetLists(q *db.Queries) echo.HandlerFunc {
 
 func PostList(q *db.Queries) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -71,8 +97,9 @@ func PostList(q *db.Queries) echo.HandlerFunc {
 func DeleteList(q *db.Queries) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, _ := strconv.Atoi(c.Param("id"))
-		// get the last logged user by date
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -116,8 +143,9 @@ func DeleteList(q *db.Queries) echo.HandlerFunc {
 func GetTasks(q *db.Queries) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, _ := strconv.Atoi(c.Param("id"))
+		username, _ := GetUserAndPassFromHeader(c)
 
-		user, err := q.GetUserByDate(context.Background())
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -157,9 +185,9 @@ func GetTasks(q *db.Queries) echo.HandlerFunc {
 func PostTasks(q *db.Queries) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, _ := strconv.Atoi(c.Param("id"))
+		username, _ := GetUserAndPassFromHeader(c)
 
-		// get the last logged user by date
-		user, err := q.GetUserByDate(context.Background())
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -222,10 +250,12 @@ func DeleteTask(q *db.Queries) echo.HandlerFunc {
 
 func ProduceCSV(q *db.Queries, filename string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user, err := q.GetUserByDate(context.Background())
+		username, _ := GetUserAndPassFromHeader(c)
+		user, err := q.GetUserByUsername(context.Background(), username)
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		records := CSV.GetTasksByUser(q, user)
 		CSV.OpenCSV(records, filename)
 

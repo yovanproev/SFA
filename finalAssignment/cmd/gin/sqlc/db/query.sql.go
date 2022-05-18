@@ -112,23 +112,6 @@ func (q *Queries) DeleteUserByUsername(ctx context.Context, username string) err
 	return err
 }
 
-const getUserByDate = `-- name: GetUserByDate :one
-SELECT id, username, password, datestamp FROM users
-WHERE datestamp = CURRENT_TIMESTAMP
-`
-
-func (q *Queries) GetUserByDate(ctx context.Context) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByDate)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Password,
-		&i.Datestamp,
-	)
-	return i, err
-}
-
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, password, datestamp FROM users
 WHERE username = ?
@@ -216,14 +199,4 @@ WHERE id = ?
 
 func (q *Queries) UpdateTask(ctx context.Context, id int32) (sql.Result, error) {
 	return q.db.ExecContext(ctx, updateTask, id)
-}
-
-const updateUsersById = `-- name: UpdateUsersById :execresult
-UPDATE users
-SET datestamp = CURRENT_TIMESTAMP
-WHERE id = ?
-`
-
-func (q *Queries) UpdateUsersById(ctx context.Context, id int32) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateUsersById, id)
 }

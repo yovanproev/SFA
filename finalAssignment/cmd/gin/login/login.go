@@ -2,12 +2,10 @@ package final
 
 import (
 	"context"
-	"crypto/subtle"
-	"encoding/base64"
+	handlers "final/cmd/gin/handlers"
 	"final/cmd/gin/sqlc/db"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,11 +15,6 @@ import (
 func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	return string(bytes), err
-}
-
-func checkPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
 
 func CreateUser(q *db.Queries, username, password string) {
@@ -47,64 +40,32 @@ func CreateUser(q *db.Queries, username, password string) {
 
 func Login(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userAndPass := c.Request.Header["Authorization"]
-		if userAndPass != nil {
-			trim := strings.Trim(userAndPass[0], "Basic")
-			trim = strings.Trim(trim, " ")
+		username, password := handlers.GetUserAndPassFromHeader(c)
 
-			rawDecodedText, err := base64.StdEncoding.DecodeString(trim)
-			if err != nil {
-				panic(err)
-			}
+		// check if the user exists in the DB
+		user, err := q.GetUserByUsername(context.Background(), username)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-			splitToUserAndPass := strings.Split(string(rawDecodedText), ":")
-			username := splitToUserAndPass[0]
-			password := splitToUserAndPass[1]
-
-			// check if the user exists in the DB
-			user, err := q.GetUserByUsername(context.Background(), username)
-			if err != nil {
-				fmt.Println(err)
-			}
-
+		// create new user if it doesn't exist
+		if user.Username != username {
 			// hash password
 			hashPassword, err := hashPassword(password)
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			// create new user if it doesn't exist
-			if user.Username != username {
-				CreateUser(q, username, hashPassword)
+			CreateUser(q, username, hashPassword)
 
-				// check for the newly created user and delete the double user creation
-				user2, err := q.GetUserByUsername(context.Background(), username)
-				if err != nil {
-					fmt.Println(err)
-				}
-				err2 := q.DeleteUserById(context.Background(), user2.ID+1)
-				if err2 != nil {
-					fmt.Println(err2)
-				}
-
-				// create a new login data for the user
-				_, err3 := q.UpdateUsersById(context.Background(), user.ID)
-				if err3 != nil {
-					fmt.Println(err3)
-				}
+			// check for the newly created user and delete the double user creation
+			user2, err := q.GetUserByUsername(context.Background(), username)
+			if err != nil {
+				fmt.Println(err)
 			}
-
-			checkPass := checkPasswordHash(password, hashPassword)
-
-			// if username and password are a match
-			if subtle.ConstantTimeCompare([]byte(username), []byte(user.Username)) == 1 &&
-				checkPass {
-
-				// update the login
-				_, err := q.UpdateUsersById(context.Background(), user.ID)
-				if err != nil {
-					fmt.Println(err)
-				}
+			err2 := q.DeleteUserById(context.Background(), user2.ID+1)
+			if err2 != nil {
+				fmt.Println(err2)
 			}
 		}
 	}
@@ -115,6 +76,7 @@ func GinAccounts(q *db.Queries) gin.Accounts {
 
 	account["jovan"] = "proev"
 	account["proev"] = "jovan"
+	account["jov"] = "pro"
 
 	return account
 }

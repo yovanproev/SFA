@@ -46,15 +46,6 @@ INSERT INTO users (
 SELECT * FROM users
 WHERE username = ?;
 
--- name: GetUserByDate :one
-SELECT * FROM users
-WHERE datestamp = CURRENT_TIMESTAMP;
-
--- name: UpdateUsersById :execresult
-UPDATE users
-SET datestamp = CURRENT_TIMESTAMP
-WHERE id = ?;
-
 -- name: DeleteUserByUsername :exec
 DELETE FROM users
 WHERE username = ?;

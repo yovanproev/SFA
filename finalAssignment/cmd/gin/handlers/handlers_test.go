@@ -31,7 +31,8 @@ var (
 		Completed: true,
 		Userid:    1,
 	}
-	mockTask = []db.CreateTaskParams{{
+	mockTask = []db.Task{{
+		ID:        0,
 		Text:      "Test Task",
 		Listid:    1,
 		Userid:    1,
@@ -82,11 +83,6 @@ func TestGetUserByUsername(t *testing.T) {
 func TestPostLists(t *testing.T) {
 	// Setup
 	e := gin.Default()
-
-	_, err2 := mockDB().UpdateUsersById(context.Background(), 1)
-	if err2 != nil {
-		fmt.Println(err2)
-	}
 
 	handler := PostList(mockDB())
 
@@ -154,11 +150,6 @@ func TestGetTasks(t *testing.T) {
 func TestGetLists(t *testing.T) {
 	// Setup
 	e := gin.Default()
-
-	_, err2 := mockDB().UpdateUsersById(context.Background(), 1)
-	if err2 != nil {
-		fmt.Println(err2)
-	}
 
 	handler := GetLists(mockDB())
 
@@ -320,8 +311,9 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 }
 
 // go test . -v -cover
+
 // === RUN   TestGetUserByUsername
-// --- PASS: TestGetUserByUsername (0.04s)
+// --- PASS: TestGetUserByUsername (0.03s)
 // === RUN   TestPostLists
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
@@ -330,8 +322,8 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] POST   /api/lists                --> final/cmd/gin/handlers.PostList.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 201 |      14.775ms |       192.0.2.1 | POST     "/api/lists"
-// --- PASS: TestPostLists (0.04s)
+// [GIN] 2022/05/18 - 11:09:05 | 201 |     12.7193ms |       192.0.2.1 | POST     "/api/lists"
+// --- PASS: TestPostLists (0.02s)
 // === RUN   TestPostTasks
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
@@ -340,8 +332,8 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] POST   /api/lists/:id/tasks      --> final/cmd/gin/handlers.PostTasks.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 201 |     13.2876ms |       192.0.2.1 | POST     "/api/lists/:id/tasks"
-// --- PASS: TestPostTasks (0.02s)
+// [GIN] 2022/05/18 - 11:09:05 | 201 |     22.0968ms |       192.0.2.1 | POST     "/api/lists/:id/tasks"
+// --- PASS: TestPostTasks (0.03s)
 // === RUN   TestGetTasks
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
@@ -350,7 +342,7 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] GET    /api/lists/:id/tasks      --> final/cmd/gin/handlers.GetTasks.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |            0s |       192.0.2.1 | GET      "/api/lists/:id/tasks"
+// [GIN] 2022/05/18 - 11:09:05 | 200 |       520.9µs |       192.0.2.1 | GET      "/api/lists/:id/tasks"
 // --- PASS: TestGetTasks (0.01s)
 // === RUN   TestGetLists
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
@@ -360,7 +352,7 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] GET    /api/lists                --> final/cmd/gin/handlers.GetLists.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |       520.7µs |       192.0.2.1 | GET      "/api/lists"
+// [GIN] 2022/05/18 - 11:09:05 | 200 |       515.8µs |       192.0.2.1 | GET      "/api/lists"
 // --- PASS: TestGetLists (0.00s)
 // === RUN   TestProduceCSV
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
@@ -370,8 +362,8 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] GET    /api/list/export          --> final/cmd/gin/handlers.ProduceCSV.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |     50.9142ms |       192.0.2.1 | GET      "/api/list/export"
-// --- PASS: TestProduceCSV (0.06s)
+// [GIN] 2022/05/18 - 11:09:05 | 200 |     43.3161ms |       192.0.2.1 | GET      "/api/list/export"
+// --- PASS: TestProduceCSV (0.05s)
 // === RUN   TestDeleteTasks
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
@@ -380,8 +372,8 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] DELETE /api/tasks/:id            --> final/cmd/gin/handlers.DeleteTask.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |     13.3691ms |       192.0.2.1 | DELETE   "/api/tasks/:id"
-// --- PASS: TestDeleteTasks (0.01s)
+// [GIN] 2022/05/18 - 11:09:05 | 200 |     18.2648ms |       192.0.2.1 | DELETE   "/api/tasks/:id"
+// --- PASS: TestDeleteTasks (0.02s)
 // === RUN   TestDeleteLists
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
@@ -390,7 +382,7 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] DELETE /api/lists/:id            --> final/cmd/gin/handlers.DeleteList.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |     11.5398ms |       192.0.2.1 | DELETE   "/api/lists/:id"
+// [GIN] 2022/05/18 - 11:09:05 | 200 |     17.4495ms |       192.0.2.1 | DELETE   "/api/lists/:id"
 // --- PASS: TestDeleteLists (0.02s)
 // === RUN   TestPatchTasks
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
@@ -400,7 +392,7 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] POST   /api/lists/:id/tasks      --> final/cmd/gin/handlers.PatchTasks.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |            0s |       192.0.2.1 | POST     "/api/lists/:id/tasks"
+// [GIN] 2022/05/18 - 11:09:05 | 200 |            0s |       192.0.2.1 | POST     "/api/lists/:id/tasks"
 // --- PASS: TestPatchTasks (0.01s)
 // === RUN   TestGetWeather
 // [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
@@ -410,10 +402,10 @@ func TestEmptyDBAfterTesting(t *testing.T) {
 //  - using code:  gin.SetMode(gin.ReleaseMode)
 
 // [GIN-debug] GET    /api/weather              --> final/cmd/gin/handlers.GetWeather.func1 (3 handlers)
-// [GIN] 2022/05/17 - 10:05:02 | 200 |            0s |       192.0.2.1 | GET      "/api/weather"
+// [GIN] 2022/05/18 - 11:09:05 | 200 |            0s |       192.0.2.1 | GET      "/api/weather"
 // --- PASS: TestGetWeather (0.00s)
 // === RUN   TestEmptyDBAfterTesting
-// --- PASS: TestEmptyDBAfterTesting (0.01s)
+// --- PASS: TestEmptyDBAfterTesting (0.02s)
 // PASS
-// coverage: 76.6% of statements
-// ok      final/cmd/gin/handlers  0.669s  coverage: 76.6% of statements
+// coverage: 74.4% of statements
+// ok      final/cmd/gin/handlers  0.611s  coverage: 74.2% of statements
