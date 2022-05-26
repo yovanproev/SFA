@@ -1,5 +1,4 @@
 production.env
-/cmd/echo/weather/development.env
-/cmd/echo/handlers/want_task.csv
-/cmd/echo/handlers/got_task.csv
-/cmd/echo/handlers/test.db
+development.env
+test.db
+storage.db
